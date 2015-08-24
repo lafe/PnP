@@ -976,26 +976,34 @@ namespace Microsoft.SharePoint.Client
 
         private static bool IsUsingOfficeTheme(this Web web)
         {
-            ThemeInfo ti = web.ThemeInfo;
-            web.Context.Load(ti);
-            var accentText = ti.GetThemeShadeByName("AccentText");
-            var backgroundOverlay = ti.GetThemeShadeByName("BackgroundOverlay");
-            var bodyText = ti.GetThemeShadeByName("BodyText");
-            web.Context.ExecuteQueryRetry();
-
-            string accentTextRGB = accentText.Value.Substring(2);
-            string backgroundOverlayARGB = backgroundOverlay.Value.Substring(2);
-            string bodyTextRGB = bodyText.Value.Substring(2);
-
-            if (accentTextRGB.Equals("0072C6") &&
-                backgroundOverlayARGB.Equals("FFFFFF") &&
-                bodyTextRGB.Equals("444444") &&
-                ti.ThemeBackgroundImageUri == null)
+            try
             {
-                return true;
+                ThemeInfo ti = web.ThemeInfo;
+                web.Context.Load(ti);
+                var accentText = ti.GetThemeShadeByName("AccentText");
+                var backgroundOverlay = ti.GetThemeShadeByName("BackgroundOverlay");
+                var bodyText = ti.GetThemeShadeByName("BodyText");
+                web.Context.ExecuteQueryRetry();
+
+                string accentTextRGB = accentText.Value.Substring(2);
+                string backgroundOverlayARGB = backgroundOverlay.Value.Substring(2);
+                string bodyTextRGB = bodyText.Value.Substring(2);
+
+                if (accentTextRGB.Equals("0072C6") &&
+                    backgroundOverlayARGB.Equals("FFFFFF") &&
+                    bodyTextRGB.Equals("444444") &&
+                    ti.ThemeBackgroundImageUri == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
-            else
+            catch (Exception)
             {
+                //Can cause an error OnPrem. Ignore it and assume that it's a different theme.
                 return false;
             }
         }
